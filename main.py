@@ -115,15 +115,16 @@ async def book_handler(message: types.Message):
 
 @dp.message()
 async def process_all_messages(message: types.Message):
-    # Якщо це не команда меню, пересилаємо як заявку
-    menu_buttons = ["🏡 Наші будиночки", "💰 Ціни", "📍 Як дістатися", "📞 Контакти", "📅 Забронювати відпочинок"]
+    menu_buttons = [
+        "🏡 Наші будиночки", "💰 Ціни", "📍 Як дістатися", 
+        "📞 Контакти", "📅 Забронювати відпочинок", "🚣 Активний відпочинок"
+    ]
     if message.text not in menu_buttons:
-        await bot.send_message(
-            ADMIN_ID,
-            f"🔔 **НОВА ЗАЯВКА!**\nВід: {message.from_user.full_name} (@{message.from_user.username})\nТекст: {message.text}"
-        )
+        # Відправка копії повідомлення тобі (адміну)
+        await bot.send_message(ADMIN_ID, f"🔔 ЗАЯВКА!\nВід: {message.from_user.full_name}\nТекст: {message.text}")
+        
+        # Відповідь клієнту (ТУТ МИ ЗМІНИЛИ ТЕКСТ)
         await message.answer("✅ Дякуємо! Ваша заявка передана адміністраторам, скоро з вами зв'яжуться.")
-
 
 async def main():
     print("Бот запущений! Перевіряй Telegram.")
