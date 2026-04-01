@@ -42,11 +42,15 @@ async def houses_handler(message: types.Message):
 @dp.callback_query(F.data.startswith("house_"))
 async def show_house_details(callback: types.CallbackQuery):
     house_id = callback.data.split("_")[1]
-    price = "450 грн/доба"
+    
+    # Створюємо умову для ціни
     if house_id == "13":
+        price = "600 грн/доба"
         text = f"🌟 **Будиночок №13 (Люкс)**\n💰 Ціна: {price}"
     else:
+        price = "450 грн/доба"
         text = f"🏠 **Будиночок №{house_id}**\n💰 Ціна: {price}"
+    
     await callback.message.answer(text)
     await callback.answer()
 
