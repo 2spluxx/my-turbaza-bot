@@ -122,7 +122,7 @@ async def process_all_messages(message: types.Message):
             ADMIN_ID,
             f"🔔 **НОВА ЗАЯВКА!**\nВід: {message.from_user.full_name} (@{message.from_user.username})\nТекст: {message.text}"
         )
-        await message.answer("✅ Дякуємо! Ваша заявка передана батькам, скоро вам зателефонують.")
+        await message.answer("✅ Дякуємо! Ваша заявка передана адміністраторам, скоро з вами зв'яжуться.")
 
 
 async def main():
