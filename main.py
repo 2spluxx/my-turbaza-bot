@@ -33,16 +33,23 @@ async def start_handler(message: types.Message):
 @dp.message(F.text == "🏡 Наші будиночки")
 async def houses_handler(message: types.Message):
     builder = InlineKeyboardBuilder()
-
-    # Створюємо кнопки для 12 будиночків
     for i in range(1, 13):
         builder.button(text=f"🏠 №{i}", callback_data=f"house_{i}")
-
-    # 13-й будиночок (Люкс)
     builder.button(text="⭐ Люкс №13", callback_data="house_13")
-
     builder.adjust(3)
-    await message.answer("Оберіть будиночок для детальної інформації:", reply_markup=builder.as_markup())
+    await message.answer("Оберіть будиночок:", reply_markup=builder.as_markup())
+
+@dp.callback_query(F.data.startswith("house_"))
+async def show_house_details(callback: types.CallbackQuery):
+    house_id = callback.data.split("_")[1]
+    price = "450 грн/доба"
+    if house_id == "13":
+        text = f"🌟 **Будиночок №13 (Люкс)**\n💰 Ціна: {price}"
+    else:
+        text = f"🏠 **Будиночок №{house_id}**\n💰 Ціна: {price}"
+    await callback.message.answer(text)
+    await callback.answer()
+
 
 
 @dp.callback_query(F.data.startswith("house_"))
