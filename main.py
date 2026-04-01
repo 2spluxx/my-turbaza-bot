@@ -7,13 +7,14 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 # --- КОНФІГУРАЦІЯ ---
-TOKEN = "8764367109:AAFiDnNJEuYJf9IJvwq_csdl7RwF65cJWGE"
+# ВСТАВ СЮДИ СВІЙ ТОКЕН (ЯКЩО ВІН ПОМИЛКОВИЙ — ОНОВИ ЧЕРЕЗ /REVOKE)
+TOKEN = "8164367109:AAFIDnNJEyJf9Ijvwq_csdl7RwF65cJNGE"
 ADMIN_ID = 5010492306
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ВЕБ-СЕРВЕР ДЛЯ RENDER (ЩОБ НЕ ЗАСИНАВ) ---
+# --- ВЕБ-СЕРВЕР ДЛЯ RENDER ---
 app = Flask(__name__)
 
 @app.route('/')
@@ -36,74 +37,71 @@ def main_menu():
 # --- ОБРОБНИКИ КОМАНД ---
 @dp.message(Command("start"))
 async def start_handler(message: types.Message):
-    await message.answer("Вас вітає турбаза! Оберіть розділ меню нижче:", reply_markup=main_menu())
+    await message.answer("Вітаємо на базі відпочинку «Купава» (м. Світловодськ)! ✨\nОберіть потрібний розділ:", reply_markup=main_menu())
 
 @dp.message(F.text == "🏡 Наші будиночки")
 async def houses_handler(message: types.Message):
     builder = InlineKeyboardBuilder()
-    # Будиночки з 1 по 12
     for i in range(1, 13):
         builder.button(text=f"🏠 №{i}", callback_data=f"house_{i}")
-    # Окремо Люкс №13
     builder.button(text="⭐ Люкс №13", callback_data="house_13")
     builder.adjust(3)
-    await message.answer("Оберіть будиночок, щоб дізнатися деталі:", reply_markup=builder.as_markup())
+    await message.answer("Оберіть будиночок для детальної інформації:", reply_markup=builder.as_markup())
 
 @dp.callback_query(F.data.startswith("house_"))
 async def show_house_details(callback: types.CallbackQuery):
     house_id = callback.data.split("_")[1]
-    
     if house_id == "13":
         price = "600 грн/доба"
-        text = f"🌟 **Будиночок №13 (Люкс)**\n\nОпис: Покращені умови, кондиціонер, власна тераса.\n💰 Ціна: {price}"
+        text = f"🌟 **Будиночок №13 (Люкс)**\n\nКомфортний номер з усіма зручностями та видом на Дніпро.\n💰 Ціна: {price}"
     else:
         price = "450 грн/доба"
-        text = f"🏠 **Будиночок №{house_id}**\n\nОпис: Затишний будиночок для відпочинку.\n💰 Ціна: {price}"
-    
+        text = f"🏠 **Будиночок №{house_id}**\n\nЗатишний стандартний будиночок.\n💰 Ціна: {price}"
     await callback.message.answer(text, parse_mode="Markdown")
     await callback.answer()
 
 @dp.message(F.text == "💰 Ціни")
 async def price_handler(message: types.Message):
     price_text = (
-        "💵 **Актуальні ціни на сезон:**\n\n"
-        "🏠 Стандарт (№1-12): 450 грн/доба\n"
-        "⭐ Люкс (№13): 600 грн/доба\n\n"
-        "🚣 Оренда човна: 100 грн/година"
+        "💵 **Ціни на відпочинок:**\n\n"
+        "🏠 Будиночки №1-12: 450 грн/доба\n"
+        "⭐ Люкс №13: 600 грн/доба\n"
+        "🚣 Човни/Катамарани: уточнюйте на базі"
     )
     await message.answer(price_text, parse_mode="Markdown")
 
 @dp.message(F.text == "📞 Контакти")
 async def contacts_handler(message: types.Message):
-    await message.answer("📞 **Наші контакти:**\n\nАдміністрація: +380XXXXXXXXX\nМи чекаємо на ваші дзвінки!")
+    contacts_text = (
+        "📞 **Наші номери телефонів:**\n\n"
+        "📲 +380986302601\n"
+        "📲 +380679858393\n\n"
+        "Телефонуйте для бронювання!"
+    )
+    await message.answer(contacts_text)
 
 @dp.message(F.text == "📍 Як дістатися")
 async def location_handler(message: types.Message):
-    await message.answer("📍 Ми знаходимося поблизу Світловодська.\n[Посилання на Google Maps]")
+    location_text = (
+        "📍 **База відпочинку «Купава»**\n"
+        "Ми знаходимося у м. Світловодськ.\n\n"
+        "🗺 **Маршрут у Google Maps:**\n"
+        "https://www.google.com/maps?q=49.0768,33.1895"
+    )
+    await message.answer(location_text, disable_web_page_preview=False)
 
-# --- ПРИЙОМ ЗАЯВОК (БУДЬ-ЯКИЙ ТЕКСТ) ---
 @dp.message()
 async def process_all_messages(message: types.Message):
     menu_buttons = ["🏡 Наші будиночки", "💰 Ціни", "📍 Як дістатися", "📞 Контакти", "📅 Забронювати відпочинок", "🚣 Активний відпочинок"]
-    
     if message.text not in menu_buttons:
-        # Відправка адміну
-        admin_text = f"🔔 **НОВА ЗАЯВКА!**\n\n👤 Від: {message.from_user.full_name}\n🆔 ID: {message.from_user.id}\n💬 Текст: {message.text}"
+        admin_text = f"🔔 **НОВА ЗАЯВКА!**\n\n👤 Від: {message.from_user.full_name}\n💬 Текст: {message.text}"
         await bot.send_message(ADMIN_ID, admin_text, parse_mode="Markdown")
-        
-        # Відповідь клієнту
-        await message.answer("✅ Дякуємо! Ваша заявка передана, скоро вам зателефонують.")
+        await message.answer("✅ Ваше повідомлення отримано! Ми зателефонуємо вам найближчим часом.")
 
-# --- ЗАПУСК ---
 async def main():
-    # Запускаємо Flask у фоновому потоці
     threading.Thread(target=run_flask, daemon=True).start()
-    
-    print("Бот запущений! Перевіряй Telegram.")
+    print("Бот Купава запущений!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("Бот зупинений")
+    asyncio.run(main())
