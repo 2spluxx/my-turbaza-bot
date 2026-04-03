@@ -7,7 +7,7 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 # --- НАЛАШТУВАННЯ ---
-TOKEN = "8164367109:AAFIDnNJEyJf9Ijvwq_csdl7RwF65cJNGE"
+TOKEN = "8764367109:AAH6-pVwVEtEVexiZ10Pwu4LM_9chTB9jHk"
 ADMIN_ID = 5010492306
 
 bot = Bot(token=TOKEN)
