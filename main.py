@@ -7,7 +7,7 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 # --- НАЛАШТУВАННЯ ---
-TOKEN = "8764367109:AAH6-pVwVEtEVexiZ10Pwu4LM_9chTB9jHk"
+TOKEN = "8164367109:AAFIDnNJEyJf9Ijvwq_csdl7RwF65cJNGE"
 ADMIN_ID = 5010492306
 
 bot = Bot(token=TOKEN)
@@ -90,27 +90,42 @@ async def booking(message: types.Message):
         reply_markup=builder.as_markup(resize_keyboard=True)
     )
 
+# Отримання контакту
 @dp.message(F.contact)
 async def handle_contact(message: types.Message):
     contact = message.contact
     user_mention = f"[@{message.from_user.username}]" if message.from_user.username else f"ID: {message.from_user.id}"
-    admin_text = f"🔔 **НОВА ЗАЯВКА (КОНТАКТ)!**\n👤 Ім'я: {contact.first_name}\n📞 Тел: {contact.phone_number}\n🔗 Профіль: {user_mention}"
+    
+    admin_text = f"🔔 **НОВА ЗАЯВКА (КОНТАКТ)!**\n" \
+                 f"👤 Ім'я: {contact.first_name}\n" \
+                 f"📞 Тел: {contact.phone_number}\n" \
+                 f"🔗 Профіль: {user_mention}"
+    
     await bot.send_message(ADMIN_ID, admin_text)
     await message.answer("✅ Номер отримано! Адміністратор скоро зателефонує вам.", reply_markup=main_menu())
 
+# --- УНІВЕРСАЛЬНИЙ ОБРОБНИК ПОВІДОМЛЕНЬ ---
 @dp.message()
 async def handle_messages(message: types.Message):
     menu_btns = ["🏡 Наші будиночки", "💰 Ціни", "🚣 Активний відпочинок", "📍 Як дістатися", "📞 Контакти", "📅 Забронювати відпочинок", "⬅️ Назад"]
+    
     if message.text == "⬅️ Назад":
         await message.answer("Головне меню:", reply_markup=main_menu())
         return
+
+    # Якщо користувач пише щось інше (дату чи питання), це вважається заявкою
     if message.text and message.text not in menu_btns:
         user_info = f"@{message.from_user.username}" if message.from_user.username else message.from_user.full_name
-        await bot.send_message(ADMIN_ID, f"🔔 **НОВА ЗАЯВКА!**\n👤 Від: {user_info}\n💬 Текст: {message.text}")
+        
+        await bot.send_message(ADMIN_ID, 
+            f"🔔 **НОВА ЗАЯВКА!**\n👤 Від: {user_info}\n💬 Текст: {message.text}")
         await message.answer("✅ Ваше повідомлення надіслано адміністратору! Чекайте на відповідь.")
 
+# --- ЗАПУСК ---
 async def main():
+    # Запускаємо веб-сервер в окремому потоці
     threading.Thread(target=run_flask, daemon=True).start()
+    # Запускаємо бота
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
